@@ -2,6 +2,7 @@ package com.kizitonwose.calendar.compose
 
 import android.util.Log
 import androidx.compose.foundation.MutatePriority
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.interaction.InteractionSource
@@ -16,15 +17,21 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.IntSize
 import com.kizitonwose.calendar.core.CalendarMonth
 import com.kizitonwose.calendar.core.OutDateStyle
+import com.kizitonwose.calendar.core.daysOfWeek
 import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
+import com.kizitonwose.calendar.core.yearMonth
 import com.kizitonwose.calendar.data.DataStore
 import com.kizitonwose.calendar.data.checkDateRange
 import com.kizitonwose.calendar.data.getCalendarMonthData
 import com.kizitonwose.calendar.data.getMonthIndex
 import com.kizitonwose.calendar.data.getMonthIndicesCount
+import com.kizitonwose.calendar.data.weekOfMonth
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.YearMonth
 
 /**
@@ -188,6 +195,8 @@ class CalendarState internal constructor(
         getCalendarMonthData(startMonth, offset, firstDayOfWeek, outDateStyle).calendarMonth
     }
 
+    internal var firstDayProperty: Pair<Offset, IntSize> = Pair(Offset.Zero, IntSize.Zero)
+
     init {
         monthDataChanged() // Update monthIndexCount initially.
     }
@@ -217,7 +226,33 @@ class CalendarState internal constructor(
      * range of [startMonth] and [endMonth].
      */
     suspend fun animateScrollToMonth(month: YearMonth) {
-        listState.animateScrollToItem(getScrollIndex(month) ?: return)
+        animateScrollToMonth(month, 0)
+    }
+
+    suspend fun animateScrollToDate(date: LocalDate) {
+        // TODO: Remove
+        Log.d("Scroll", date.toString())
+        Log.d("Scroll", firstDayProperty.first.toString())
+        val (firstDayOffset, firstDaySize) = firstDayProperty
+        if (firstDaySize == IntSize.Zero) {
+            animateScrollToMonth(date.yearMonth)
+            return
+        }
+        val scrollOffset = when (layoutInfo.orientation) {
+            Orientation.Vertical -> {
+                val weekIndex = date.weekOfMonth(firstDayOfWeek) - 1 // week 1 = index 0, etc.
+                firstDayOffset.y.toInt() + (firstDaySize.height * weekIndex)
+            }
+            Orientation.Horizontal -> {
+                val dayOfWeekIndex = daysOfWeek(firstDayOfWeek).indexOf(date.dayOfWeek)
+                firstDayOffset.x.toInt() + (firstDaySize.width * dayOfWeekIndex)
+            }
+        }
+        animateScrollToMonth(date.yearMonth, scrollOffset)
+    }
+
+    private suspend fun animateScrollToMonth(month: YearMonth, offset: Int) {
+        listState.animateScrollToItem(getScrollIndex(month) ?: return, offset)
     }
 
     private fun getScrollIndex(month: YearMonth): Int? {

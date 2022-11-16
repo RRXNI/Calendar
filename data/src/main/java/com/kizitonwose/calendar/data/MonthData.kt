@@ -11,7 +11,6 @@ import com.kizitonwose.calendar.core.yearMonth
 import java.time.DayOfWeek
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
-import java.time.temporal.WeekFields
 
 data class MonthData internal constructor(
     private val month: YearMonth,
@@ -56,8 +55,7 @@ fun getCalendarMonthData(
     val outDays = (inDays + month.lengthOfMonth()).let { totalDays ->
         val endOfRow = if (totalDays % 7 != 0) 7 - (totalDays % 7) else 0
         val endOfGrid = if (outDateStyle == OutDateStyle.EndOfRow) 0 else run {
-            val weekOfMonthField = WeekFields.of(firstDayOfWeek, 1).weekOfMonth()
-            val weeksInMonth = month.atEndOfMonth().get(weekOfMonthField)
+            val weeksInMonth = month.atEndOfMonth().weekOfMonth(firstDayOfWeek)
             return@run (6 - weeksInMonth) * 7
         }
         return@let endOfRow + endOfGrid

@@ -12,6 +12,9 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.unit.IntSize
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.CalendarMonth
 
@@ -20,6 +23,7 @@ internal fun LazyListScope.CalendarMonths(
     monthCount: Int,
     monthData: (offset: Int) -> CalendarMonth,
     contentHeightMode: ContentHeightMode,
+    firstDayObserver: ((Offset, IntSize) -> Unit)?,
     dayContent: @Composable BoxScope.(CalendarDay) -> Unit,
     monthHeader: (@Composable ColumnScope.(CalendarMonth) -> Unit)?,
     monthBody: (@Composable ColumnScope.(CalendarMonth, content: @Composable () -> Unit) -> Unit)?,
@@ -36,6 +40,7 @@ internal fun LazyListScope.CalendarMonths(
             ContentHeightMode.Fill -> true
         }
         val hasContainer = monthContainer != null
+        val hasBody = monthBody != null
         monthContainer.or(defaultMonthContainer)(month) {
             Column(
                 modifier = Modifier
@@ -55,14 +60,23 @@ internal fun LazyListScope.CalendarMonths(
                             .fillMaxWidth()
                             .then(if (fillHeight) Modifier.weight(1f) else Modifier.wrapContentHeight()),
                     ) {
-                        for (week in month.weekDays) {
+                        for ((weekIndex, week) in month.weekDays.withIndex()) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .then(if (fillHeight) Modifier.weight(1f) else Modifier.wrapContentHeight()),
                             ) {
-                                for (day in week) {
-                                    Box(modifier = Modifier.weight(1f)) {
+                                for ((dayIndex, day) in week.withIndex()) {
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .observerFirstDay(
+                                                weekIndex = weekIndex,
+                                                dayIndex = dayIndex,
+                                                hasBody = hasBody,
+                                                valueChanged = firstDayObserver,
+                                            ),
+                                    ) {
                                         dayContent(day)
                                     }
                                 }
@@ -83,3 +97,25 @@ private val defaultMonthBody: (@Composable ColumnScope.(CalendarMonth, content: 
     { _, content -> content() }
 
 private fun <T> T?.or(default: T) = this ?: default
+
+private fun Modifier.observerFirstDay(
+    weekIndex: Int,
+    dayIndex: Int,
+    hasBody: Boolean,
+    valueChanged: ((Offset, IntSize) -> Unit)? = null,
+): Modifier {
+    return if (weekIndex != 0 || dayIndex != 0 || valueChanged == null) {
+        this
+    } else {
+        this.onGloballyPositioned { value ->
+            val parentCoordinates = value.parentLayoutCoordinates
+                ?.parentLayoutCoordinates
+                ?.parentLayoutCoordinates
+                ?.let { if (hasBody) it.parentCoordinates else it }
+            val position = parentCoordinates
+                ?.localPositionOf(value, Offset.Zero)
+                ?: Offset.Zero
+            valueChanged(position, value.size)
+        }
+    }
+}

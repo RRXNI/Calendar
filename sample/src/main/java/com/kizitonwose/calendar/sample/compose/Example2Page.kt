@@ -25,6 +25,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,6 +50,7 @@ import com.kizitonwose.calendar.sample.R
 import com.kizitonwose.calendar.sample.shared.ContinuousSelectionHelper.getSelection
 import com.kizitonwose.calendar.sample.shared.DateSelection
 import com.kizitonwose.calendar.sample.shared.displayText
+import kotlinx.coroutines.delay
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -82,6 +84,11 @@ fun Example2Page(
                     firstVisibleMonth = currentMonth,
                     firstDayOfWeek = daysOfWeek.first(),
                 )
+                // TODO: Remove
+                LaunchedEffect(currentMonth) {
+                    delay(3000)
+                    state.animateScrollToDate(currentMonth.plusMonths(9).atDay(20))
+                }
                 CalendarTop(
                     daysOfWeek = daysOfWeek,
                     selection = selection,

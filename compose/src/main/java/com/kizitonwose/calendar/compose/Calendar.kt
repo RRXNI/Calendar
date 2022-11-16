@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.kizitonwose.calendar.compose.CalendarDefaults.flingBehavior
 import com.kizitonwose.calendar.compose.heatmapcalendar.HeatMapCalendarImpl
@@ -166,6 +168,11 @@ private fun Calendar(
     monthFooter: (@Composable ColumnScope.(CalendarMonth) -> Unit)?,
     monthContainer: (@Composable LazyItemScope.(CalendarMonth, container: @Composable () -> Unit) -> Unit)?,
 ) {
+    val firstDayObserver: ((Offset, IntSize) -> Unit)? = if (calendarScrollPaged) {
+        null
+    } else {
+        { offset, size -> state.firstDayProperty = Pair(offset, size) }
+    }
     if (isHorizontal) {
         LazyRow(
             modifier = modifier,
@@ -179,6 +186,7 @@ private fun Calendar(
                 monthCount = state.monthIndexCount,
                 monthData = { offset -> state.store[offset] },
                 contentHeightMode = contentHeightMode,
+                firstDayObserver = firstDayObserver,
                 dayContent = dayContent,
                 monthHeader = monthHeader,
                 monthBody = monthBody,
@@ -199,6 +207,7 @@ private fun Calendar(
                 monthCount = state.monthIndexCount,
                 monthData = { offset -> state.store[offset] },
                 contentHeightMode = contentHeightMode,
+                firstDayObserver = firstDayObserver,
                 dayContent = dayContent,
                 monthHeader = monthHeader,
                 monthBody = monthBody,

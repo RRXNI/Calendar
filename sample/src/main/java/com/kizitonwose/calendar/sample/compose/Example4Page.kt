@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +40,7 @@ import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
 import com.kizitonwose.calendar.sample.R
 import com.kizitonwose.calendar.sample.shared.displayText
+import kotlinx.coroutines.delay
 import java.time.YearMonth
 
 @Composable
@@ -57,6 +59,11 @@ fun Example4Page() {
             firstVisibleMonth = currentMonth,
             firstDayOfWeek = firstDayOfWeekFromLocale(),
         )
+        // TODO: Remove
+        LaunchedEffect(currentMonth) {
+            delay(1000)
+            state.animateScrollToDate(currentMonth.plusMonths(100).atDay(19))
+        }
         HorizontalCalendar(
             state = state,
             dayContent = { day -> Day(day) },
