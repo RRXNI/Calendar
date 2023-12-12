@@ -1,6 +1,7 @@
 package com.kizitonwose.calendar.sample.compose
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,8 +32,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -62,7 +65,7 @@ fun Example2Page(
     close: () -> Unit = {},
     dateSelected: (startDate: LocalDate, endDate: LocalDate) -> Unit = { _, _ -> },
 ) {
-    val currentMonth = remember { YearMonth.now() }
+    val currentMonth = remember { YearMonth.now().withMonth(1) }
     val startMonth = remember { currentMonth }
     val endMonth = remember { currentMonth.plusMonths(12) }
     val today = remember { LocalDate.now() }
@@ -82,12 +85,12 @@ fun Example2Page(
                     firstVisibleMonth = currentMonth,
                     firstDayOfWeek = daysOfWeek.first(),
                 )
-                CalendarTop(
-                    daysOfWeek = daysOfWeek,
-                    selection = selection,
-                    close = close,
-                    clearDates = { selection = DateSelection() },
-                )
+//                CalendarTop(
+//                    daysOfWeek = daysOfWeek,
+//                    selection = selection,
+//                    close = close,
+//                    clearDates = { selection = DateSelection() },
+//                )
                 VerticalCalendar(
                     state = state,
                     contentPadding = PaddingValues(bottom = 100.dp),
@@ -106,6 +109,16 @@ fun Example2Page(
                                 )
                             }
                         }
+                    },
+                    monthBody = { _, content ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 4.dp),
+                        ) {
+                            content()
+                        }
+
                     },
                     monthHeader = { month -> MonthHeader(month) },
                 )
@@ -135,28 +148,29 @@ private fun Day(
     selection: DateSelection,
     onClick: (CalendarDay) -> Unit,
 ) {
-    var textColor = Color.Transparent
+    var textColor = colorResource(R.color.example_4_grey)
     Box(
         modifier = Modifier
             .aspectRatio(1f) // This is important for square-sizing!
+            .alpha(if (day.position == DayPosition.MonthDate) 1f else 0f)
             .clickable(
                 enabled = day.position == DayPosition.MonthDate && day.date >= today,
                 showRipple = false,
                 onClick = { onClick(day) },
             )
-            .backgroundHighlight(
-                day = day,
-                today = today,
-                selection = selection,
-                selectionColor = selectionColor,
-                continuousSelectionColor = continuousSelectionColor,
-            ) { textColor = it },
+            .then(
+                if (day.date == today) Modifier.border(
+                    width = 1.dp,
+                    shape = CircleShape,
+                    color = colorResource(R.color.inactive_text_color),
+                ) else Modifier,
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = day.date.dayOfMonth.toString(),
             color = textColor,
-            fontSize = 16.sp,
+            fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
         )
     }
@@ -167,12 +181,12 @@ private fun MonthHeader(calendarMonth: CalendarMonth) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 12.dp, bottom = 8.dp, start = 16.dp, end = 16.dp),
+            .padding(top = 12.dp, bottom = 8.dp, start = 8.dp),
     ) {
         Text(
             textAlign = TextAlign.Center,
-            text = calendarMonth.yearMonth.displayText(),
-            fontSize = 18.sp,
+            text = calendarMonth.yearMonth.displayText(true),
+            fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
         )
     }

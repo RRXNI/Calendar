@@ -3,9 +3,10 @@ package com.kizitonwose.calendar.compose
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -187,15 +188,33 @@ private fun Calendar(
             )
         }
     } else {
-        LazyColumn(
+//        LazyColumn(
+//            modifier = modifier,
+//            state = state.listState,
+//            flingBehavior = flingBehavior(calendarScrollPaged, state.listState),
+//            userScrollEnabled = userScrollEnabled,
+//            reverseLayout = reverseLayout,
+//            contentPadding = contentPadding,
+//        ) {
+//            CalendarMonths(
+//                monthCount = state.monthIndexCount,
+//                monthData = { offset -> state.store[offset] },
+//                contentHeightMode = contentHeightMode,
+//                dayContent = dayContent,
+//                monthHeader = monthHeader,
+//                monthBody = monthBody,
+//                monthFooter = monthFooter,
+//                monthContainer = monthContainer,
+//            )
+//        }
+        LazyVerticalGrid(
             modifier = modifier,
-            state = state.listState,
-            flingBehavior = flingBehavior(calendarScrollPaged, state.listState),
+            columns = GridCells.Fixed(3),
             userScrollEnabled = userScrollEnabled,
             reverseLayout = reverseLayout,
             contentPadding = contentPadding,
         ) {
-            CalendarMonths(
+            CalendarMonthsGrid(
                 monthCount = state.monthIndexCount,
                 monthData = { offset -> state.store[offset] },
                 contentHeightMode = contentHeightMode,
@@ -203,9 +222,27 @@ private fun Calendar(
                 monthHeader = monthHeader,
                 monthBody = monthBody,
                 monthFooter = monthFooter,
-                monthContainer = monthContainer,
+                monthContainer = null,
             )
         }
+//        LazyHorizontalGrid(
+//            modifier = modifier,
+//            rows = GridCells.Fixed(4),
+//            userScrollEnabled = userScrollEnabled,
+//            reverseLayout = reverseLayout,
+//            contentPadding = contentPadding,
+//        ) {
+//            CalendarMonthsGrid(
+//                monthCount = state.monthIndexCount,
+//                monthData = { offset -> state.store[offset] },
+//                contentHeightMode = contentHeightMode,
+//                dayContent = dayContent,
+//                monthHeader = monthHeader,
+//                monthBody = monthBody,
+//                monthFooter = monthFooter,
+//                monthContainer = null,
+//            )
+//        }
     }
 }
 
