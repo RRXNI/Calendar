@@ -8,7 +8,9 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.LinearLayout
 import androidx.core.view.children
 import androidx.core.view.isGone
+import com.kizitonwose.calendar.core.Day
 import com.kizitonwose.calendar.view.DaySize
+import java.time.DayOfWeek
 
 private class WidthDivisorLinearLayout : LinearLayout {
     constructor(context: Context) : super(context)
@@ -16,13 +18,13 @@ private class WidthDivisorLinearLayout : LinearLayout {
     constructor(context: Context, attrs: AttributeSet?, defStyle: Int) :
         super(context, attrs, defStyle)
 
-    var widthDivisor: Int = 0
+    var widthDivisorForHeight: Int = 0
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         @Suppress("NAME_SHADOWING")
-        val heightMeasureSpec = if (widthDivisor > 0) {
+        val heightMeasureSpec = if (widthDivisorForHeight > 0) {
             val width = MeasureSpec.getSize(widthMeasureSpec)
-            MeasureSpec.makeMeasureSpec(width / widthDivisor, MeasureSpec.EXACTLY)
+            MeasureSpec.makeMeasureSpec(width / widthDivisorForHeight, MeasureSpec.EXACTLY)
         } else {
             heightMeasureSpec
         }
@@ -37,8 +39,9 @@ private class WidthDivisorLinearLayout : LinearLayout {
     }
 }
 
-internal class WeekHolder<Day>(
+internal class WeekHolder<Day : ViewDay>(
     private val daySize: DaySize,
+    private val excludeDays: Set<DayOfWeek>,
     private val dayHolders: List<DayHolder<Day>>,
 ) {
 
@@ -53,7 +56,7 @@ internal class WeekHolder<Day>(
             layoutParams = LinearLayout.LayoutParams(width, height, weight)
             orientation = LinearLayout.HORIZONTAL
             weightSum = dayHolders.count().toFloat()
-            widthDivisor = if (daySize == DaySize.Square) dayHolders.count() else 0
+            widthDivisorForHeight = if (daySize == DaySize.Square) dayHolders.count() else 0
             for (holder in dayHolders) {
                 addView(holder.inflateDayView(this))
             }
@@ -61,6 +64,12 @@ internal class WeekHolder<Day>(
     }
 
     fun bindWeekView(daysOfWeek: List<Day>) {
+        @Suppress("NAME_SHADOWING")
+        val daysOfWeek = if (excludeDays.isEmpty()) {
+            daysOfWeek
+        } else {
+            daysOfWeek.filterNot { excludeDays.contains(it.date.dayOfWeek) }
+        }
         // The last week row can be empty if out date style is not `EndOfGrid`
         weekContainer.isGone = daysOfWeek.isEmpty()
         daysOfWeek.forEachIndexed { index, day ->

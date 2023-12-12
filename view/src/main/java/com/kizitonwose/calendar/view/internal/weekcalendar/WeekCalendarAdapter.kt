@@ -5,6 +5,7 @@ import android.graphics.Rect
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.kizitonwose.calendar.core.ExperimentalCalendarApi
 import com.kizitonwose.calendar.core.Week
 import com.kizitonwose.calendar.core.WeekDay
 import com.kizitonwose.calendar.data.DataStore
@@ -56,6 +57,7 @@ internal class WeekCalendarAdapter(
 
     override fun getItemCount(): Int = itemCount
 
+    @OptIn(ExperimentalCalendarApi::class)
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WeekViewHolder {
         val content = setupItemRoot(
             itemMargins = calView.weekMargins,
@@ -66,6 +68,7 @@ internal class WeekCalendarAdapter(
             itemFooterResource = calView.weekFooterResource,
             weekSize = 1,
             itemViewClass = calView.weekViewClass,
+            excludeDays = calView.excludeDays,
             dayBinder = calView.dayBinder as WeekDayBinder,
         )
 

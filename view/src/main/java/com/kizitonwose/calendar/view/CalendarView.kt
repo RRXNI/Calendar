@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.CalendarMonth
 import com.kizitonwose.calendar.core.DayPosition
+import com.kizitonwose.calendar.core.ExperimentalCalendarApi
 import com.kizitonwose.calendar.core.OutDateStyle
 import com.kizitonwose.calendar.data.checkDateRange
 import com.kizitonwose.calendar.view.internal.CalendarPageSnapHelper
@@ -167,6 +168,15 @@ open class CalendarView : RecyclerView {
      * this can be used to add a space between two months.
      */
     var monthMargins = MarginValues()
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidateViewHolders()
+            }
+        }
+
+    @ExperimentalCalendarApi
+    var excludeDays = setOf<DayOfWeek>()
         set(value) {
             if (field != value) {
                 field = value

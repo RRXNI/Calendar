@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.CalendarMonth
 import com.kizitonwose.calendar.core.DayPosition
+import com.kizitonwose.calendar.core.ExperimentalCalendarApi
 import com.kizitonwose.calendar.core.OutDateStyle
 import com.kizitonwose.calendar.core.nextMonth
 import com.kizitonwose.calendar.core.previousMonth
@@ -57,6 +58,7 @@ internal class MonthCalendarAdapter(
 
     override fun getItemCount(): Int = itemCount
 
+    @OptIn(ExperimentalCalendarApi::class)
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MonthViewHolder {
         val content = setupItemRoot(
             itemMargins = calView.monthMargins,
@@ -68,6 +70,7 @@ internal class MonthCalendarAdapter(
             weekSize = 6,
             itemViewClass = calView.monthViewClass,
             dayBinder = calView.dayBinder as MonthDayBinder,
+            excludeDays = calView.excludeDays,
         )
 
         @Suppress("UNCHECKED_CAST")

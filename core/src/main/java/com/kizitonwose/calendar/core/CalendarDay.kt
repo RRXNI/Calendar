@@ -11,4 +11,4 @@ import java.time.LocalDate
  * @param position the [DayPosition] for this day.
  */
 @Immutable
-data class CalendarDay(val date: LocalDate, val position: DayPosition) : Serializable
+data class CalendarDay(override val date: LocalDate, val position: DayPosition) : Serializable, Day

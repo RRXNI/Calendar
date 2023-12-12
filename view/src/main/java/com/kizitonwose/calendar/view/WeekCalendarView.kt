@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.view.ViewGroup
 import androidx.core.content.withStyledAttributes
 import androidx.recyclerview.widget.RecyclerView
+import com.kizitonwose.calendar.core.ExperimentalCalendarApi
 import com.kizitonwose.calendar.core.Week
 import com.kizitonwose.calendar.core.WeekDay
 import com.kizitonwose.calendar.data.checkDateRange
@@ -134,6 +135,15 @@ open class WeekCalendarView : RecyclerView {
      * this can be used to add a space between two weeks.
      */
     var weekMargins = MarginValues()
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidateViewHolders()
+            }
+        }
+
+    @ExperimentalCalendarApi
+    var excludeDays = setOf<DayOfWeek>()
         set(value) {
             if (field != value) {
                 field = value

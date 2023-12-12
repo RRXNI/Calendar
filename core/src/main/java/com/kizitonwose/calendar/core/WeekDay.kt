@@ -11,4 +11,4 @@ import java.time.LocalDate
  * @param position the [WeekDayPosition] for this day.
  */
 @Immutable
-data class WeekDay(val date: LocalDate, val position: WeekDayPosition) : Serializable
+data class WeekDay(override val date: LocalDate, val position: WeekDayPosition) : Serializable, Day

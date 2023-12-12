@@ -9,20 +9,24 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.LinearLayout
+import com.kizitonwose.calendar.core.Day
 import com.kizitonwose.calendar.view.Binder
 import com.kizitonwose.calendar.view.DaySize
 import com.kizitonwose.calendar.view.MarginValues
 import com.kizitonwose.calendar.view.ViewContainer
+import java.time.DayOfWeek
 import java.time.LocalDate
 
-internal data class ItemContent<Day>(
+internal typealias ViewDay = Day
+
+internal data class ItemContent<Day : ViewDay>(
     val itemView: ViewGroup,
     val headerView: View?,
     val footerView: View?,
     val weekHolders: List<WeekHolder<Day>>,
 )
 
-internal fun <Day, Container : ViewContainer> setupItemRoot(
+internal fun <Day : ViewDay, Container : ViewContainer> setupItemRoot(
     itemMargins: MarginValues,
     daySize: DaySize,
     context: Context,
@@ -32,7 +36,9 @@ internal fun <Day, Container : ViewContainer> setupItemRoot(
     weekSize: Int,
     itemViewClass: String?,
     dayBinder: Binder<Day, Container>,
+    excludeDays: Set<DayOfWeek>,
 ): ItemContent<Day> {
+    check(excludeDays.size < 7) { "Cannot exclude all days in the week" }
     val rootLayout = LinearLayout(context).apply {
         orientation = LinearLayout.VERTICAL
     }
@@ -51,7 +57,11 @@ internal fun <Day, Container : ViewContainer> setupItemRoot(
     )
 
     val weekHolders = List(weekSize) {
-        WeekHolder(dayConfig.daySize, List(7) { DayHolder(dayConfig) })
+        WeekHolder(
+            daySize = dayConfig.daySize,
+            excludeDays = excludeDays,
+            dayHolders = List(7 - excludeDays.size) { DayHolder(dayConfig) },
+        )
     }.onEach { weekHolder ->
         rootLayout.addView(weekHolder.inflateWeekView(rootLayout))
     }

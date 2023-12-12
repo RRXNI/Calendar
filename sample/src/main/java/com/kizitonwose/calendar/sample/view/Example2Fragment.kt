@@ -12,6 +12,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.CalendarMonth
 import com.kizitonwose.calendar.core.DayPosition
+import com.kizitonwose.calendar.core.ExperimentalCalendarApi
 import com.kizitonwose.calendar.core.daysOfWeek
 import com.kizitonwose.calendar.sample.R
 import com.kizitonwose.calendar.sample.databinding.Example2CalendarDayBinding
@@ -21,6 +22,7 @@ import com.kizitonwose.calendar.sample.shared.displayText
 import com.kizitonwose.calendar.view.MonthDayBinder
 import com.kizitonwose.calendar.view.MonthHeaderFooterBinder
 import com.kizitonwose.calendar.view.ViewContainer
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -37,6 +39,7 @@ class Example2Fragment : BaseFragment(R.layout.example_2_fragment), HasToolbar, 
     private var selectedDate: LocalDate? = null
     private val today = LocalDate.now()
 
+    @OptIn(ExperimentalCalendarApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
@@ -50,6 +53,8 @@ class Example2Fragment : BaseFragment(R.layout.example_2_fragment), HasToolbar, 
         }
 
         configureBinders()
+        binding.exTwoCalendar.excludeDays = setOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
+
         binding.exTwoCalendar.setup(
             YearMonth.now(),
             YearMonth.now().plusMonths(200),
@@ -106,18 +111,21 @@ class Example2Fragment : BaseFragment(R.layout.example_2_fragment), HasToolbar, 
                 container.day = data
                 val textView = container.textView
                 textView.text = data.date.dayOfMonth.toString()
-
-                if (data.position == DayPosition.MonthDate) {
+                if (data.date.dayOfWeek == DayOfWeek.SUNDAY || data.date.dayOfWeek == DayOfWeek.SATURDAY) {
+                    textView.makeGone()
+                } else if (data.position == DayPosition.MonthDate) {
                     textView.makeVisible()
                     when (data.date) {
                         selectedDate -> {
                             textView.setTextColorRes(R.color.example_2_white)
                             textView.setBackgroundResource(R.drawable.example_2_selected_bg)
                         }
+
                         today -> {
                             textView.setTextColorRes(R.color.example_2_red)
                             textView.background = null
                         }
+
                         else -> {
                             textView.setTextColorRes(R.color.example_2_black)
                             textView.background = null
